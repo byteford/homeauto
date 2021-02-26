@@ -1,0 +1,7 @@
+.terraform.lock.hcl
+crash.log
+.terraform/
+config/
+.gitignore
+terraform.tfstate
+provider/vendor/
