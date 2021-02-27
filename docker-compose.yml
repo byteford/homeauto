@@ -3,7 +3,7 @@ services:
     #image: homeassistant/home-assistant
     build: .
     volumes:
-      - ./config /config
+      - ./config:/config
     ports:
       - 8123:8123
 
