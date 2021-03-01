@@ -3,7 +3,6 @@ package main
 import (
 	"context"
 	"fmt"
-	"net/http"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -32,13 +31,6 @@ func Provider() *schema.Provider {
 	}
 }
 
-// Client -
-type Client struct {
-	HostURL    string
-	HTTPClient *http.Client
-	Token      string
-}
-
 func providerConfigure(ctx context.Context, d *schema.ResourceData) (interface{}, diag.Diagnostics) {
 
 	var diags diag.Diagnostics
@@ -61,29 +53,4 @@ func providerConfigure(ctx context.Context, d *schema.ResourceData) (interface{}
 		return nil, diags
 	}
 	return c, diags
-}
-
-//NewClient -
-func NewClient(host, token *string) (*Client, error) {
-	if token == nil {
-		return nil, fmt.Errorf("no token")
-	}
-	c := Client{
-		HTTPClient: &http.Client{},
-		HostURL:    "",
-	}
-
-	if host != nil {
-		c.HostURL = *host
-	}
-	req, err := http.NewRequest("GET", fmt.Sprintf("%s/api/", c.HostURL), nil)
-	if err != nil {
-		return nil, err
-	}
-	req.Header.Add("Authorization", fmt.Sprintf("Bearer %s", *token))
-	_, err = c.HTTPClient.Do(req)
-	if err != nil {
-		return nil, err
-	}
-	return &c, nil
 }

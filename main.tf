@@ -8,6 +8,9 @@ terraform {
 }
 provider "homeauto"{
     host = "http://127.0.0.1:8123"
-    beaver_token = "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiIwZDczODhjMGM2OWU0OWRmYjg3NjI5YmIyMjRkYzEyNSIsImlhdCI6MTYxNDM0ODQ0OCwiZXhwIjoxOTI5NzA4NDQ4fQ.p7IQqfwuUN0_L8-saNhiIIo-MqE0bFq-kTKOkdiqYqg"
+    beaver_token = "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiI4M2MyNDc0YTY3OWI0ZWRjOTQ2YjZjZTM4ZTlhZTNhNiIsImlhdCI6MTYxNDQxNzAxMSwiZXhwIjoxOTI5Nzc3MDExfQ.VSpG9ivML0bBIwG82j64ek2PbiuKhL7hTO4pJrLKSS8"
 }
-resource "homeauto_light" main{}
+resource "homeauto_light" main{
+  entity_id = "light.virtual_light_10"
+  state = "off"
+}

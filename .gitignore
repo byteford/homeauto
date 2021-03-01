@@ -5,3 +5,4 @@ config/
 .gitignore
 terraform.tfstate
 provider/vendor/
+terraform.tfstate.backup
