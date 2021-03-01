@@ -2,7 +2,6 @@
 crash.log
 .terraform/
 config/
-.gitignore
 terraform.tfstate
 provider/vendor/
 terraform.tfstate.backup
