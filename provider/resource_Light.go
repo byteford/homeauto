@@ -28,6 +28,55 @@ func resourceLight() *schema.Resource {
 				Optional: true,
 				Computed: true,
 			},
+			"friendly_name": &schema.Schema{
+				Type:     schema.TypeString,
+				Optional: true,
+				Computed: true,
+			},
+			"color_mode": &schema.Schema{
+				Type:     schema.TypeString,
+				Optional: true,
+				Computed: true,
+			},
+			"brightness": &schema.Schema{
+				Type:     schema.TypeInt,
+				Optional: true,
+				Computed: true,
+			},
+			"white_value": &schema.Schema{
+				Type:     schema.TypeInt,
+				Optional: true,
+				Computed: true,
+			},
+			"supported_features": &schema.Schema{
+				Type:     schema.TypeInt,
+				Optional: true,
+				Computed: true,
+			},
+			"hs_color": &schema.Schema{
+				Type:     schema.TypeList,
+				Optional: true,
+				Computed: true,
+				Elem: &schema.Schema{
+					Type: schema.TypeFloat,
+				},
+			},
+			"rgb_color": &schema.Schema{
+				Type:     schema.TypeList,
+				Optional: true,
+				Computed: true,
+				Elem: &schema.Schema{
+					Type: schema.TypeInt,
+				},
+			},
+			"xy_color": &schema.Schema{
+				Type:     schema.TypeList,
+				Optional: true,
+				Computed: true,
+				Elem: &schema.Schema{
+					Type: schema.TypeFloat,
+				},
+			},
 		},
 	}
 }
@@ -35,11 +84,22 @@ func resourceLightCreate(ctx context.Context, d *schema.ResourceData, m interfac
 	//var diags diag.Diagnostics
 	c := m.(*Client)
 	item := LightItem{
-		EntityID: d.Get("entity_id").(string),
-		State:    d.Get("state").(string),
+		EntityID:          d.Get("entity_id").(string),
+		State:             d.Get("state").(string),
+		Brightness:        d.Get("brightness").(string),
+		HsColor:           d.Get("hs_color").(string),
+		RgbColor:          d.Get("rgb_color").(string),
+		XyColor:           d.Get("xy_color").(string),
+		WhiteValue:        d.Get("white_value").(string),
+		Name:              d.Get("friendly_name").(string),
+		ColorMode:         d.Get("color_mode").(string),
+		SupportedFeatures: d.Get("supported_features").(string),
 	}
 	if item.State == "" {
 		item.State = "on"
+	}
+	if item.SupportedFeatures == nil {
+		item.SupportedFeatures = 147
 	}
 	o, err := c.StartLight(item)
 	if err != nil {
