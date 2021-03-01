@@ -1,4 +1,4 @@
-package main
+package homeauto
 
 // LightItem -
 type LightItem struct {

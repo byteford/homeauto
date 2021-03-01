@@ -1,7 +1,7 @@
 terraform {
   required_providers {
     homeauto = {
-      version = "0.3.1"
+      version = "0.0.1"
       source  = "dgp.com/byteford/homeauto"
     }
   }
