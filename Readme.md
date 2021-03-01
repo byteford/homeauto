@@ -111,3 +111,5 @@ Steps:
     return c, diags
 
     ```
+
+    - This is now the Provider set up, but it wont do anything until we create a resource
