@@ -6,3 +6,4 @@ config/
 terraform.tfstate
 provider/vendor/
 terraform.tfstate.backup
+terraform.tfvars

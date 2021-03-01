@@ -1,7 +1,7 @@
 services:
   homeassistant:
-    #image: homeassistant/home-assistant
-    build: .
+    image: homeassistant/home-assistant
+    #build: .
     volumes:
       - ./config:/config
     ports:

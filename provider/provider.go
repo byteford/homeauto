@@ -17,11 +17,11 @@ func Provider() *schema.Provider {
 				Required:    true,
 				DefaultFunc: schema.EnvDefaultFunc("HOMEAUTO_HOST", nil),
 			},
-			"beaver_token": &schema.Schema{
+			"bearer_token": &schema.Schema{
 				Type:        schema.TypeString,
 				Required:    true,
 				Sensitive:   true,
-				DefaultFunc: schema.EnvDefaultFunc("HOMEAUTO_BEAVER_TOKEN", nil),
+				DefaultFunc: schema.EnvDefaultFunc("HOMEAUTO_BEARER_TOKEN", nil),
 			},
 		},
 		ResourcesMap: map[string]*schema.Resource{
@@ -34,7 +34,7 @@ func Provider() *schema.Provider {
 func providerConfigure(ctx context.Context, d *schema.ResourceData) (interface{}, diag.Diagnostics) {
 
 	var diags diag.Diagnostics
-	bearerToken := d.Get("beaver_token").(string)
+	bearerToken := d.Get("bearer_token").(string)
 
 	var host *string
 	hVal, ok := d.GetOk("host")
