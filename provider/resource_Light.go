@@ -41,12 +41,11 @@ func resourceLight() *schema.Resource {
 			"brightness": &schema.Schema{
 				Type:     schema.TypeInt,
 				Optional: true,
-				Computed: true,
+				Default:  255,
 			},
 			"white_value": &schema.Schema{
 				Type:     schema.TypeInt,
 				Optional: true,
-				Computed: true,
 			},
 			"supported_features": &schema.Schema{
 				Type:     schema.TypeInt,
