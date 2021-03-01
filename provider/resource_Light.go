@@ -55,7 +55,6 @@ func resourceLight() *schema.Resource {
 			"hs_color": &schema.Schema{
 				Type:     schema.TypeList,
 				Optional: true,
-				Computed: true,
 				Elem: &schema.Schema{
 					Type: schema.TypeFloat,
 				},
@@ -63,7 +62,6 @@ func resourceLight() *schema.Resource {
 			"rgb_color": &schema.Schema{
 				Type:     schema.TypeList,
 				Optional: true,
-				Computed: true,
 				Elem: &schema.Schema{
 					Type: schema.TypeInt,
 				},
@@ -71,7 +69,6 @@ func resourceLight() *schema.Resource {
 			"xy_color": &schema.Schema{
 				Type:     schema.TypeList,
 				Optional: true,
-				Computed: true,
 				Elem: &schema.Schema{
 					Type: schema.TypeFloat,
 				},
@@ -82,7 +79,7 @@ func resourceLight() *schema.Resource {
 func resourceLightCreate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	//var diags diag.Diagnostics
 	c := m.(*Client)
-	//return diag.FromErr(fmt.Errorf("%v", len(d.Get("hs_color").([]interface{}))))
+	//return diag.FromErr(fmt.Errorf("%[1]T: %[1]v", d.Get("rgb_color.#")))
 	item := LightItem{
 		EntityID: d.Get("entity_id").(string),
 		State:    d.Get("state").(string),
@@ -94,14 +91,14 @@ func resourceLightCreate(ctx context.Context, d *schema.ResourceData, m interfac
 			SupportedFeatures: d.Get("supported_features").(int),
 		},
 	}
-	if len(d.Get("hs_color").([]interface{})) != 0 {
-		item.Attr.HsColor = d.Get("hs_color").([]float64)
+	if d.Get("hs_color.#").(int) != 0 {
+		item.Attr.HsColor = []float64{d.Get("hs_color.0").(float64), d.Get("hs_color.1").(float64)}
 	}
-	if len(d.Get("rgb_color").([]interface{})) != 0 {
-		item.Attr.RgbColor = d.Get("rgb_color").([]int)
+	if d.Get("rgb_color.#").(int) != 0 {
+		item.Attr.RgbColor = []int{d.Get("rgb_color.0").(int), d.Get("rgb_color.1").(int), d.Get("rgb_color.2").(int)}
 	}
-	if len(d.Get("xy_color").([]interface{})) != 0 {
-		item.Attr.XyColor = d.Get("xy_color").([]float64)
+	if d.Get("xy_color.#").(int) != 0 {
+		item.Attr.XyColor = []float64{d.Get("xy_color.0").(float64), d.Get("xy_color.1").(float64)}
 	}
 	//			HsColor:           d.Get("hs_color").([]float64),
 	//RgbColor:          d.Get("rgb_color").([]int),
@@ -150,14 +147,14 @@ func resourceLightUpdate(ctx context.Context, d *schema.ResourceData, m interfac
 			SupportedFeatures: d.Get("supported_features").(int),
 		},
 	}
-	if len(d.Get("hs_color").([]interface{})) != 0 {
-		item.Attr.HsColor = d.Get("hs_color").([]float64)
+	if d.Get("hs_color.#").(int) != 0 {
+		item.Attr.HsColor = []float64{d.Get("hs_color.0").(float64), d.Get("hs_color.1").(float64)}
 	}
-	if len(d.Get("rgb_color").([]interface{})) != 0 {
-		item.Attr.RgbColor = d.Get("rgb_color").([]int)
+	if d.Get("rgb_color.#").(int) != 0 {
+		item.Attr.RgbColor = []int{d.Get("rgb_color.0").(int), d.Get("rgb_color.1").(int), d.Get("rgb_color.2").(int)}
 	}
-	if len(d.Get("xy_color").([]interface{})) != 0 {
-		item.Attr.XyColor = d.Get("xy_color").([]float64)
+	if d.Get("xy_color.#").(int) != 0 {
+		item.Attr.XyColor = []float64{d.Get("xy_color.0").(float64), d.Get("xy_color.1").(float64)}
 	}
 	_, err := c.StartLight(item)
 	if err != nil {
