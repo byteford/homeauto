@@ -26,17 +26,17 @@ func resourceLight() *schema.Resource {
 			"state": &schema.Schema{
 				Type:     schema.TypeString,
 				Optional: true,
-				Computed: true,
+				Default:  "on",
 			},
 			"friendly_name": &schema.Schema{
 				Type:     schema.TypeString,
 				Optional: true,
-				Computed: true,
+				Default:  "Light",
 			},
 			"color_mode": &schema.Schema{
 				Type:     schema.TypeString,
 				Optional: true,
-				Computed: true,
+				Default:  "hs",
 			},
 			"brightness": &schema.Schema{
 				Type:     schema.TypeInt,
@@ -51,7 +51,7 @@ func resourceLight() *schema.Resource {
 			"supported_features": &schema.Schema{
 				Type:     schema.TypeInt,
 				Optional: true,
-				Computed: true,
+				Default:  147,
 			},
 			"hs_color": &schema.Schema{
 				Type:     schema.TypeList,
@@ -83,24 +83,30 @@ func resourceLight() *schema.Resource {
 func resourceLightCreate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	//var diags diag.Diagnostics
 	c := m.(*Client)
+	//return diag.FromErr(fmt.Errorf("%v", len(d.Get("hs_color").([]interface{}))))
 	item := LightItem{
-		EntityID:          d.Get("entity_id").(string),
-		State:             d.Get("state").(string),
-		Brightness:        d.Get("brightness").(string),
-		HsColor:           d.Get("hs_color").(string),
-		RgbColor:          d.Get("rgb_color").(string),
-		XyColor:           d.Get("xy_color").(string),
-		WhiteValue:        d.Get("white_value").(string),
-		Name:              d.Get("friendly_name").(string),
-		ColorMode:         d.Get("color_mode").(string),
-		SupportedFeatures: d.Get("supported_features").(string),
+		EntityID: d.Get("entity_id").(string),
+		State:    d.Get("state").(string),
+		Attr: Attributes{
+			Brightness:        d.Get("brightness").(int),
+			WhiteValue:        d.Get("white_value").(int),
+			Name:              d.Get("friendly_name").(string),
+			ColorMode:         d.Get("color_mode").(string),
+			SupportedFeatures: d.Get("supported_features").(int),
+		},
 	}
-	if item.State == "" {
-		item.State = "on"
+	if len(d.Get("hs_color").([]interface{})) != 0 {
+		item.Attr.HsColor = d.Get("hs_color").([]float64)
 	}
-	if item.SupportedFeatures == nil {
-		item.SupportedFeatures = 147
+	if len(d.Get("rgb_color").([]interface{})) != 0 {
+		item.Attr.RgbColor = d.Get("rgb_color").([]int)
 	}
+	if len(d.Get("xy_color").([]interface{})) != 0 {
+		item.Attr.XyColor = d.Get("xy_color").([]float64)
+	}
+	//			HsColor:           d.Get("hs_color").([]float64),
+	//RgbColor:          d.Get("rgb_color").([]int),
+	//XyColor:           d.Get("xy_color").([]float64),
 	o, err := c.StartLight(item)
 	if err != nil {
 		return diag.FromErr(err)
@@ -121,6 +127,15 @@ func resourceLightRead(ctx context.Context, d *schema.ResourceData, m interface{
 	if err := d.Set("state", light.State); err != nil {
 		return diag.FromErr(err)
 	}
+	if err := d.Set("hs_color", light.Attr.HsColor); err != nil {
+		return diag.FromErr(err)
+	}
+	if err := d.Set("rgb_color", light.Attr.RgbColor); err != nil {
+		return diag.FromErr(err)
+	}
+	if err := d.Set("xy_color", light.Attr.XyColor); err != nil {
+		return diag.FromErr(err)
+	}
 	return diags
 }
 func resourceLightUpdate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
@@ -128,6 +143,22 @@ func resourceLightUpdate(ctx context.Context, d *schema.ResourceData, m interfac
 	item := LightItem{
 		EntityID: d.Get("entity_id").(string),
 		State:    d.Get("state").(string),
+		Attr: Attributes{
+			Brightness:        d.Get("brightness").(int),
+			WhiteValue:        d.Get("white_value").(int),
+			Name:              d.Get("friendly_name").(string),
+			ColorMode:         d.Get("color_mode").(string),
+			SupportedFeatures: d.Get("supported_features").(int),
+		},
+	}
+	if len(d.Get("hs_color").([]interface{})) != 0 {
+		item.Attr.HsColor = d.Get("hs_color").([]float64)
+	}
+	if len(d.Get("rgb_color").([]interface{})) != 0 {
+		item.Attr.RgbColor = d.Get("rgb_color").([]int)
+	}
+	if len(d.Get("xy_color").([]interface{})) != 0 {
+		item.Attr.XyColor = d.Get("xy_color").([]float64)
 	}
 	_, err := c.StartLight(item)
 	if err != nil {
