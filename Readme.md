@@ -113,3 +113,51 @@ Steps:
     ```
 
     - This is now the Provider set up, but it wont do anything until we create a resource
+
+6. The resource
+    - Return to the main.tf file
+    - Under the provider lets make a basic light. Paste the following
+
+    ```HCL
+    resource "homeauto_light" "main" {
+    entity_id = "light.virtual_light_10"
+    state     = "on"
+    }
+    ```
+
+    - run `sh build.sh` to build and run everything again
+    - You should get a lovely error message saying not set up, but if you scroll up you can see the plan trying to make the lights.
+    - It knows what I light is as the schema is already made in `./provider/homeauto/resource_Light.go`
+
+7. Getting creating
+    - Head to `./provider/homeauto/resource_Light.go`
+    - You can see the schema has already been made but some things to point out
+
+    ```go
+        CreateContext: resourceLightCreate,
+        ReadContext:   resourceLightRead,
+        UpdateContext: resourceLightUpdate,
+        DeleteContext: resourceLightDelete,
+    ```
+
+    - This sets the methods to be run by terraform on different steps
+
+    - Replace the content of `resourceLightCreate` with:
+
+    ```go
+        c := m.(*Client)
+        item := LightItem{
+            EntityID: d.Get("entity_id").(string),
+            State:    d.Get("state").(string),
+        }
+        o, err := c.StartLight(item)
+        if err != nil {
+            return diag.FromErr(err)
+        }
+        d.SetId(o.EntityID)
+        return resourceLightRead(ctx, d, m)
+    ```
+
+    - run `sh build.sh 0.0.1`
+    - If you now go back to `URL:8123`, you should see a light appear
+    

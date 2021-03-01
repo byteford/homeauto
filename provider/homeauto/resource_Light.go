@@ -78,8 +78,17 @@ func resourceLight() *schema.Resource {
 	}
 }
 func resourceLightCreate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-
-	return diag.FromErr(fmt.Errorf("Not SetUP"))
+	c := m.(*Client)
+	item := LightItem{
+		EntityID: d.Get("entity_id").(string),
+		State:    d.Get("state").(string),
+	}
+	o, err := c.StartLight(item)
+	if err != nil {
+		return diag.FromErr(err)
+	}
+	d.SetId(o.EntityID)
+	return resourceLightRead(ctx, d, m)
 }
 func resourceLightRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 
