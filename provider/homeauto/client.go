@@ -8,14 +8,16 @@ import (
 	"strings"
 )
 
-// Client -
+// Client is the struct that terraform passes as the identity of the server
 type Client struct {
 	HostURL    string
 	HTTPClient *http.Client
 	Token      string
 }
 
-//NewClient -
+//NewClient creates Client and makes sure that the Authorization is correct
+// host = hosts url is http://127.0.0.1:8123
+// token = The bearer token used for authentication
 func NewClient(host, token *string) (*Client, error) {
 	if token == nil {
 		return nil, fmt.Errorf("no token")
@@ -41,7 +43,8 @@ func NewClient(host, token *string) (*Client, error) {
 	return &c, nil
 }
 
-//GetLight -
+//GetLight is used to get the currest state of a light
+//lightID = the ID of a light (eg. light.virtual_light_10 )
 func (c *Client) GetLight(lightID string) (*LightItem, error) {
 	req, err := http.NewRequest("GET", fmt.Sprintf("%s/api/states/%s", c.HostURL, lightID), nil)
 	if err != nil {
@@ -61,7 +64,8 @@ func (c *Client) GetLight(lightID string) (*LightItem, error) {
 	return &light, nil
 }
 
-//StartLight -
+//StartLight runs a POST request on the api to create a light (is light already exists it updates it)
+// Takes in the state you want the light to be, returns the state the light ends up in
 func (c *Client) StartLight(lightItem LightItem) (*LightItem, error) {
 	rb, err := json.Marshal(lightItem)
 	if err != nil {
@@ -85,7 +89,7 @@ func (c *Client) StartLight(lightItem LightItem) (*LightItem, error) {
 	return &light, nil
 }
 
-// DelLight -
+// DelLight will delete the light and return an error if the delete fails
 func (c *Client) DelLight(lightID string) error {
 	req, err := http.NewRequest("DELETE", fmt.Sprintf("%s/api/states/%s", c.HostURL, lightID), nil)
 	if err != nil {
@@ -99,6 +103,8 @@ func (c *Client) DelLight(lightID string) error {
 	}
 	return nil
 }
+
+// doRequest is used to add authorization and send the request to the server
 func (c *Client) doRequest(req *http.Request) ([]byte, error) {
 	req.Header.Set("Authorization", c.Token)
 
