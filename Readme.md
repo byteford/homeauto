@@ -31,7 +31,7 @@ anywhere you see `NAME` change to a username (no spaces)
 ## 4. Connect terraform to the provider
 
 - run `sh build.sh NAME 0.0.1`
-        - This with compile the provider and save it to go build -o ~/.terraform.d/plugins/github.com/byteford/homeauto/0.0.1/darwin_amd64/
+        - This with compile the provider and save it to go build -o ~/.terraform.d/plugins/github.com/NAME/homeauto/0.0.1/darwin_amd64/
         - The script will then run terraform plan and terraform apply
         - We get errors about use not doing anything with the `bearer_token` variable but it works other than that
 - Go in to `main.tf` and set with provider up remeber to change `NAME`
@@ -60,6 +60,7 @@ variable bearer_token{
 ```
 
 - Now run `terraform init` and `terraform plan`
+  - If you want to clean up the formatting in any of the terraform files just run `terraform fmt`      
   - This should have run though and not given any errors, Though it isn't doing anything at the moment
 
 ## 5. Setting up the provider
@@ -191,8 +192,9 @@ if err := d.Set("state", light.State); err != nil {
 return diags
 
 ```
-
-- We still can't update the lights we make (if you get issues running `sh build.sh NAME 0.0.1` try deleting the `terraform.tfstate` file)
+- Have a look in to the `terraform.tfstate` that was made when we did the `terraform apply` in the last step, the `status = tanted` meaning terraform doesn't trust the state
+- Delete the `terraform.tfstate` and `terraform.tfstate.backup` files if they exsist
+- Run `sh build.sh NAME 0.0.1` and look at the `terraform.tfstate` file again, you will see the status value isnt there this time because the state can be tracked now
 
 ## 9. Updating the light
 
