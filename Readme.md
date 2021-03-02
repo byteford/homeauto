@@ -133,7 +133,7 @@ resource "homeauto_light" "main" {
 }
 ```
 
-- run `sh build.sh NAME 0.0.1` to build and run everything again
+- Run `sh build.sh NAME 0.0.1` to build and run everything again
   - You should get a lovely error message saying not set up, but if you scroll up you can see the plan trying to make the lights.
   - It knows what a light is as the schema is already made in `./provider/homeauto/resource_Light.go`
 
@@ -167,12 +167,12 @@ d.SetId(o.EntityID)
 return resourceLightRead(ctx, d, m)
 ```
 
-- run `sh build.sh NAME 0.0.1`
+- run `sh build.sh NAME 0.0.1` - Will through an error, but the light will be created
 - If you now go back to `URL:8123`, you should see a light appear
 
 ## 8. Saving the state
 
-- Having a way of creating light but not saving anything about them its that useful
+- Having a way of creating light but not saving anything about them isn't that useful
 - still in `./provider/homeauto/resource_Light.go` lets add to the `resourceLightRead` function that will let terraform ask the api what states its in
 - replace the body of the `resourceLightRead` function with
 
@@ -192,12 +192,12 @@ return diags
 
 ```
 
-- We still can't update the lights we make (if you get issues running terraform apply try deleting the `terraform.tfstate` file)
+- We still can't update the lights we make (if you get issues running `sh build.sh NAME 0.0.1` try deleting the `terraform.tfstate` file)
 
 ## 9. Updating the light
 
-- One of the key features of terraform is being able to change the infrastructure by changing the .tf file. lets implement that now.
-- still in the `./provider/homeauto/resource_Light.go` file add the following code to the `resourceLightUpdate` function:
+- One of the key features of terraform is being able to change the infrastructure by changing the .tf file. Lets implement that now.
+- Still in the `./provider/homeauto/resource_Light.go` file add the following code to the `resourceLightUpdate` function:
 
 ```go
 c := m.(*Client)
@@ -214,9 +214,9 @@ return resourceLightRead(ctx, d, m)
 
 ```
 
-- If you go back to the `main.tf` and change the state to "off" and run `terraform apply` in the terminal if should turn the light "off"
+- If you go back to the `main.tf` and change the state to "off" and run `sh build.sh NAME 0.0.1` in the terminal if should turn the light "off"
 
-## 10. cleaning it up
+## 10. Cleaning it up
 
 - The last part we need to implement is `terraform destroy`
 - To do this the following code should be put in to `resourceLightDelete`:
