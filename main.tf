@@ -1,20 +1,20 @@
 terraform {
-  required_providers {
-    homeauto = {
-      version = "0.0.1"
-      source  = "github.com/byteford/homeauto"
+    required_providers {
+        homeauto = {
+            version = "0.0.1"
+            source  = "github.com/byteford/homeauto"
+        }
     }
-  }
 }
 provider "homeauto" {
-  host         = "http://127.0.0.1:8123"
-  bearer_token = var.bearer_token
-}
+    host         = "http://127.0.0.1:8123"
+    bearer_token = var.bearer_token
+}  
 resource "homeauto_light" "main" {
-  entity_id = "light.virtual_light_10"
-  state     = "on"
-}
-resource "homeauto_light" "colour" {
+    entity_id = "light.virtual_light_10"
+    state     = "on"
+    }
+    resource "homeauto_light" "colour" {
   entity_id     = "light.virtual_light_12"
   state         = "on"
   brightness    = 100
