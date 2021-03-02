@@ -1,121 +1,103 @@
 package homeauto
 
 import (
+	"bytes"
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
 	"net/http"
-	"strings"
 )
 
-// Client -
+// Client is the struct that terraform passes as the identity of the server
 type Client struct {
 	HostURL    string
 	HTTPClient *http.Client
 	Token      string
 }
 
-//NewClient -
-func NewClient(host, token *string) (*Client, error) {
-	if token == nil {
-		return nil, fmt.Errorf("no token")
+//NewClient creates Client and makes sure that the Authorization is correct
+// host = hosts url is http://127.0.0.1:8123
+// token = The bearer token used for authentication
+// client = The http client used for the calls
+func NewClient(host, token string, client *http.Client) *Client {
+	return &Client{
+		HTTPClient: client,
+		HostURL:    host,
+		Token:      fmt.Sprintf("Bearer %s", token),
 	}
-	c := Client{
-		HTTPClient: &http.Client{},
-		HostURL:    "",
-		Token:      fmt.Sprintf("Bearer %s", *token),
-	}
-
-	if host != nil {
-		c.HostURL = *host
-	}
-	req, err := http.NewRequest("GET", fmt.Sprintf("%s/api/", c.HostURL), nil)
-	if err != nil {
-		return nil, err
-	}
-	req.Header.Add("Authorization", c.Token)
-	_, err = c.HTTPClient.Do(req)
-	if err != nil {
-		return nil, err
-	}
-	return &c, nil
 }
 
-//GetLight -
-func (c *Client) GetLight(lightID string) (*LightItem, error) {
-	req, err := http.NewRequest("GET", fmt.Sprintf("%s/api/states/%s", c.HostURL, lightID), nil)
+//GetLight is used to get the currest state of a light
+//lightID = the ID of a light (eg. light.virtual_light_10 )
+func GetLight(lightID string, client Client) (LightItem, error) {
+	var light LightItem
+	url := fmt.Sprintf("%s/api/states/%s", client.HostURL, lightID)
+	req, err := http.NewRequest(http.MethodGet, url, nil)
 	if err != nil {
-		return nil, err
+		return light, err
+	}
+	req.Header.Set("Authorization", client.Token)
+	res, err := client.HTTPClient.Do(req)
+	if err != nil {
+		return light, err
+	}
+	defer res.Body.Close()
+	body, err := ioutil.ReadAll(res.Body)
+	if err != nil {
+		return light, err
+	}
+	if res.StatusCode != http.StatusOK && res.StatusCode != http.StatusCreated {
+		return light, fmt.Errorf("status: %d, body: %s", res.StatusCode, body)
 	}
 
-	body, err := c.doRequest(req)
-
-	if err != nil {
-		return nil, err
-	}
-	light := LightItem{}
 	err = json.Unmarshal(body, &light)
 	if err != nil {
-		return nil, err
+		return light, err
 	}
-	return &light, nil
+
+	return light, nil
 }
 
-//StartLight -
-func (c *Client) StartLight(lightItem LightItem) (*LightItem, error) {
+//StartLight runs a POST request on the api to create a light (is light already exists it updates it)
+// Takes in the state you want the light to be, returns the state the light ends up in
+func StartLight(lightItem LightItem, client Client) error {
 	rb, err := json.Marshal(lightItem)
 	if err != nil {
-		return nil, err
+		return err
 	}
-	req, err := http.NewRequest("POST", fmt.Sprintf("%s/api/states/%s", c.HostURL, lightItem.EntityID), strings.NewReader(string(rb)))
-	if err != nil {
-		return nil, err
-	}
+	url := fmt.Sprintf("%s/api/states/%s", client.HostURL, lightItem.EntityID)
 
-	body, err := c.doRequest(req)
-	if err != nil {
-		return nil, fmt.Errorf("err in request: %v", err.Error(), req.URL, c.Token)
-	}
-	light := LightItem{}
-	err = json.Unmarshal(body, &light)
-	if err != nil {
-		return nil, err
-	}
-
-	return &light, nil
-}
-
-// DelLight -
-func (c *Client) DelLight(lightID string) error {
-	req, err := http.NewRequest("DELETE", fmt.Sprintf("%s/api/states/%s", c.HostURL, lightID), nil)
+	req, err := http.NewRequest(http.MethodPost, url, bytes.NewBuffer(rb))
 	if err != nil {
 		return err
 	}
-
-	_, err = c.doRequest(req)
-
+	req.Header.Set("Authorization", client.Token)
+	res, err := client.HTTPClient.Do(req)
 	if err != nil {
 		return err
+	}
+	defer res.Body.Close()
+	if res.StatusCode != http.StatusOK && res.StatusCode != http.StatusCreated {
+		return fmt.Errorf("status: %d, body: %s", res.StatusCode)
 	}
 	return nil
 }
-func (c *Client) doRequest(req *http.Request) ([]byte, error) {
-	req.Header.Set("Authorization", c.Token)
 
-	res, err := c.HTTPClient.Do(req)
+// DeleteLight will delete the light and return an error if the delete fails
+func DeleteLight(lightID string, client Client) error {
+	url := fmt.Sprintf("%s/api/states/%s", client.HostURL, lightID)
+	req, err := http.NewRequest(http.MethodDelete, url, nil)
 	if err != nil {
-		return nil, err
+		return err
+	}
+	req.Header.Set("Authorization", client.Token)
+	res, err := client.HTTPClient.Do(req)
+	if err != nil {
+		return err
 	}
 	defer res.Body.Close()
-
-	body, err := ioutil.ReadAll(res.Body)
-	if err != nil {
-		return nil, err
+	if res.StatusCode != http.StatusOK {
+		return fmt.Errorf("status: %d", res.StatusCode)
 	}
-
-	if res.StatusCode != http.StatusOK && res.StatusCode != http.StatusCreated {
-		return nil, fmt.Errorf("status: %d, body: %s", res.StatusCode, body)
-	}
-
-	return body, err
+	return nil
 }
