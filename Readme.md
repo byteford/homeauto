@@ -34,7 +34,7 @@ anywhere you see `NAME` change to a username (no spaces)
         - This with compile the provider and save it to go build -o ~/.terraform.d/plugins/github.com/byteford/homeauto/0.0.1/darwin_amd64/
         - The script will then run terraform plan and terraform apply
         - We get errors about use not doing anything with the `bearer_token` variable but it works other than that
-- Go in to main.tf and set with provider up
+- Go in to `main.tf` and set with provider up
 
 ```HCL
 terraform {
