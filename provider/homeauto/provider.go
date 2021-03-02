@@ -16,12 +16,14 @@ func Provider() *schema.Provider {
 				Type:        schema.TypeString,
 				Required:    true,
 				DefaultFunc: schema.EnvDefaultFunc("HOMEAUTO_HOST", nil),
+				Description: "There URL of the server: eg. `http://127.0.0.1:8123`",
 			},
 			"bearer_token": &schema.Schema{
 				Type:        schema.TypeString,
 				Required:    true,
 				Sensitive:   true,
 				DefaultFunc: schema.EnvDefaultFunc("HOMEAUTO_BEARER_TOKEN", nil),
+				Description: "There bearer Token of the server",
 			},
 		},
 		ResourcesMap: map[string]*schema.Resource{
