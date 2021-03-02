@@ -31,7 +31,23 @@ func NewClient(host, token string, client *http.Client) *Client {
 //lightID = the ID of a light (eg. light.virtual_light_10 )
 func GetLight(lightID string, client Client) (LightItem, error) {
 	url := fmt.Sprintf("%s/api/states/%s", client.HostURL, lightID)
-	body, err := doRequest(client, http.MethodGet, url, nil)
+	req, err := http.NewRequest(http.MethodGet, url, nil)
+	if err != nil {
+		return LightItem{}, err
+	}
+	req.Header.Set("Authorization", client.Token)
+	res, err := client.HTTPClient.Do(req)
+	if err != nil {
+		return LightItem{}, err
+	}
+	defer res.Body.Close()
+	body, err := ioutil.ReadAll(res.Body)
+	if err != nil {
+		return LightItem{}, err
+	}
+	if res.StatusCode != http.StatusOK && res.StatusCode != http.StatusCreated {
+		return LightItem{}, fmt.Errorf("status: %d, body: %s", res.StatusCode, body)
+	}
 	var light LightItem
 	err = json.Unmarshal(body, &light)
 	if err != nil {
@@ -49,9 +65,19 @@ func StartLight(lightItem LightItem, client Client) error {
 		return err
 	}
 	url := fmt.Sprintf("%s/api/states/%s", client.HostURL, lightItem.EntityID)
-	_, err = doRequest(client, http.MethodPost, url, rb)
+
+	req, err := http.NewRequest(http.MethodPost, url, bytes.NewBuffer(rb))
 	if err != nil {
 		return err
+	}
+	req.Header.Set("Authorization", client.Token)
+	res, err := client.HTTPClient.Do(req)
+	if err != nil {
+		return err
+	}
+	defer res.Body.Close()
+	if res.StatusCode != http.StatusOK && res.StatusCode != http.StatusCreated {
+		return fmt.Errorf("status: %d, body: %s", res.StatusCode)
 	}
 	return nil
 }
@@ -59,29 +85,18 @@ func StartLight(lightItem LightItem, client Client) error {
 // DeleteLight will delete the light and return an error if the delete fails
 func DeleteLight(lightID string, client Client) error {
 	url := fmt.Sprintf("%s/api/states/%s", client.HostURL, lightID)
-	_, err := doRequest(client, http.MethodDelete, url, nil)
+	req, err := http.NewRequest(http.MethodDelete, url, nil)
 	if err != nil {
 		return err
-	}
-	return nil
-}
-func doRequest(client Client, method, url string, rb []byte) ([]byte, error) {
-	req, err := http.NewRequest(method, url, bytes.NewBuffer(rb))
-	if err != nil {
-		return nil, err
 	}
 	req.Header.Set("Authorization", client.Token)
 	res, err := client.HTTPClient.Do(req)
 	if err != nil {
-		return nil, err
+		return err
 	}
 	defer res.Body.Close()
-	body, err := ioutil.ReadAll(res.Body)
-	if err != nil {
-		return nil, err
+	if res.StatusCode != http.StatusOK {
+		return fmt.Errorf("status: %d", res.StatusCode)
 	}
-	if res.StatusCode != http.StatusOK && res.StatusCode != http.StatusCreated {
-		return nil, fmt.Errorf("status: %d, body: %s", res.StatusCode, body)
-	}
-	return body, nil
+	return nil
 }
