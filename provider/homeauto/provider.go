@@ -2,7 +2,7 @@ package homeauto
 
 import (
 	"context"
-	"fmt"
+	"net/http"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -39,21 +39,13 @@ func providerConfigure(ctx context.Context, d *schema.ResourceData) (interface{}
 	var diags diag.Diagnostics
 	bearerToken := d.Get("bearer_token").(string)
 
-	var host *string
+	var host string
 	hVal, ok := d.GetOk("host")
 	if ok {
 		tempHost := hVal.(string)
-		host = &tempHost
+		host = tempHost
 	}
 
-	c, err := NewClient(host, &bearerToken)
-	if err != nil {
-		diags = append(diags, diag.Diagnostic{
-			Severity: diag.Error,
-			Summary:  "Unable to create homeauto client",
-			Detail:   fmt.Sprintf("%v", err),
-		})
-		return nil, diags
-	}
+	c := NewClient(host, bearerToken, &http.Client{})
 	return c, diags
 }

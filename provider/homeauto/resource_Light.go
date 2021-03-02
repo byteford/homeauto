@@ -102,7 +102,7 @@ func resourceLightCreate(ctx context.Context, d *schema.ResourceData, m interfac
 	if d.Get("xy_color.#").(int) != 0 {
 		item.Attr.XyColor = []float64{d.Get("xy_color.0").(float64), d.Get("xy_color.1").(float64)}
 	}
-	o, err := c.StartLight(item)
+	o, err := StartLight(item, *c)
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -116,7 +116,7 @@ func resourceLightRead(ctx context.Context, d *schema.ResourceData, m interface{
 	var diags diag.Diagnostics
 	lightID := d.Id()
 
-	light, err := c.GetLight(lightID)
+	light, err := GetLight(lightID, *c)
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -158,7 +158,7 @@ func resourceLightUpdate(ctx context.Context, d *schema.ResourceData, m interfac
 	if d.Get("xy_color.#").(int) != 0 {
 		item.Attr.XyColor = []float64{d.Get("xy_color.0").(float64), d.Get("xy_color.1").(float64)}
 	}
-	_, err := c.StartLight(item)
+	_, err := StartLight(item, *c)
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -171,7 +171,7 @@ func resourceLightDelete(ctx context.Context, d *schema.ResourceData, m interfac
 	var diags diag.Diagnostics
 	lightID := d.Id()
 
-	err := c.DelLight(lightID)
+	_, err := DelLight(lightID, *c)
 	if err != nil {
 		return diag.FromErr(err)
 	}
