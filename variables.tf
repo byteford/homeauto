@@ -1,3 +1,3 @@
-variable bearer_token{
-    sensitive = true
+variable "bearer_token" {
+  sensitive = true
 }

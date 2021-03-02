@@ -7,6 +7,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
+// resourceLight contains the definition of the recourse that terraform creates
 func resourceLight() *schema.Resource {
 	return &schema.Resource{
 		CreateContext: resourceLightCreate,
@@ -76,10 +77,11 @@ func resourceLight() *schema.Resource {
 		},
 	}
 }
+
+//resourceLightCreate is run when terraform apply creates a new resource
 func resourceLightCreate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	//var diags diag.Diagnostics
+
 	c := m.(*Client)
-	//return diag.FromErr(fmt.Errorf("%[1]T: %[1]v", d.Get("rgb_color.#")))
 	item := LightItem{
 		EntityID: d.Get("entity_id").(string),
 		State:    d.Get("state").(string),
@@ -100,23 +102,21 @@ func resourceLightCreate(ctx context.Context, d *schema.ResourceData, m interfac
 	if d.Get("xy_color.#").(int) != 0 {
 		item.Attr.XyColor = []float64{d.Get("xy_color.0").(float64), d.Get("xy_color.1").(float64)}
 	}
-	//			HsColor:           d.Get("hs_color").([]float64),
-	//RgbColor:          d.Get("rgb_color").([]int),
-	//XyColor:           d.Get("xy_color").([]float64),
-	o, err := c.StartLight(item)
+	err := StartLight(item, *c)
 	if err != nil {
 		return diag.FromErr(err)
 	}
-	d.SetId(o.EntityID)
+	d.SetId(item.EntityID)
 	return resourceLightRead(ctx, d, m)
-	//return diags
 }
+
+//resourceLightRead is used to get the state of a light from the API
 func resourceLightRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	c := m.(*Client)
 	var diags diag.Diagnostics
 	lightID := d.Id()
 
-	light, err := c.GetLight(lightID)
+	light, err := GetLight(lightID, *c)
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -134,6 +134,8 @@ func resourceLightRead(ctx context.Context, d *schema.ResourceData, m interface{
 	}
 	return diags
 }
+
+//resourceLightUpdate is called when a light already exists but the state needs to change
 func resourceLightUpdate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	c := m.(*Client)
 	item := LightItem{
@@ -156,18 +158,20 @@ func resourceLightUpdate(ctx context.Context, d *schema.ResourceData, m interfac
 	if d.Get("xy_color.#").(int) != 0 {
 		item.Attr.XyColor = []float64{d.Get("xy_color.0").(float64), d.Get("xy_color.1").(float64)}
 	}
-	_, err := c.StartLight(item)
+	err := StartLight(item, *c)
 	if err != nil {
 		return diag.FromErr(err)
 	}
 	return resourceLightRead(ctx, d, m)
 }
+
+//resourceLightDelete is called when you run terraform delete or remove a resource from the state
 func resourceLightDelete(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	c := m.(*Client)
 	var diags diag.Diagnostics
 	lightID := d.Id()
 
-	err := c.DelLight(lightID)
+	err := DeleteLight(lightID, *c)
 	if err != nil {
 		return diag.FromErr(err)
 	}
