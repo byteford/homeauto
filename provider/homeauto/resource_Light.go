@@ -171,7 +171,7 @@ func resourceLightDelete(ctx context.Context, d *schema.ResourceData, m interfac
 	var diags diag.Diagnostics
 	lightID := d.Id()
 
-	_, err := DelLight(lightID, *c)
+	_, err := DeleteLight(lightID, *c)
 	if err != nil {
 		return diag.FromErr(err)
 	}

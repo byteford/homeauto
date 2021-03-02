@@ -41,8 +41,8 @@ func StartLight(lightItem LightItem, client Client) (LightItem, error) {
 	return doRequest(client, "POST", url, lightItem)
 }
 
-// DelLight will delete the light and return an error if the delete fails
-func DelLight(lightID string, client Client) (LightItem, error) {
+// DeleteLight will delete the light and return an error if the delete fails
+func DeleteLight(lightID string, client Client) (LightItem, error) {
 	url := fmt.Sprintf("%s/api/states/%s", client.HostURL, lightID)
 	return doRequest(client, "DELETE", url, LightItem{})
 }
