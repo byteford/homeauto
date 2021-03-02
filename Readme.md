@@ -1,5 +1,8 @@
 Steps:
 
+anywhere you see `URL` change to your instance url (or localhost if not remote)
+anywhere you see `NAME` change to a username (no spaces)
+
 1. Set up the home-assistant instance
 
     - open Terminal
@@ -24,7 +27,7 @@ Steps:
     - In the file replace YOUR-TOKEN in bearer_token= "YOUR-TOKEN" with the token you just made (If you have lost your token do step 2 again)
 
 4. Connect terraform to the provider
-    - run `sh build.sh 0.0.1`
+    - run `sh build.sh NAME 0.0.1`
         - This with compile the provider and save it to go build -o ~/.terraform.d/plugins/github.com/byteford/homeauto/0.0.1/darwin_amd64/
         - The script will then run terraform plan and terraform apply
         - We get errors about use not doing anything with the `bearer_token` variable but it works other than that
@@ -35,7 +38,7 @@ Steps:
             required_providers {
                 homeauto = {
                     version = "0.0.1"
-                    source  = "github.com/byteford/homeauto"
+                    source  = "github.com/NAME/homeauto"
                 }
             }
         }
@@ -125,7 +128,7 @@ Steps:
     }
     ```
 
-    - run `sh build.sh 0.0.1` to build and run everything again
+    - run `sh build.sh NAME 0.0.1` to build and run everything again
     - You should get a lovely error message saying not set up, but if you scroll up you can see the plan trying to make the lights.
     - It knows what I light is as the schema is already made in `./provider/homeauto/resource_Light.go`
 
@@ -158,7 +161,7 @@ Steps:
         return resourceLightRead(ctx, d, m)
     ```
 
-    - run `sh build.sh 0.0.1`
+    - run `sh build.sh NAME 0.0.1`
     - If you now go back to `URL:8123`, you should see a light appear
 
 8. Saving the state
@@ -222,7 +225,7 @@ Steps:
     return diags
     ```
 
-    - If you now run `sh build.sh 0.0.1` to build the latest code
+    - If you now run `sh build.sh NAME 0.0.1` to build the latest code
     - Then run `terraform destroy` to destroy the light
     - Check `URL:8123` and you should see the light no longer there
 
