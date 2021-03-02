@@ -70,23 +70,27 @@ variable bearer_token{
 - paste the following code in to the `return &schema.Provider block`
 
 ```go
-Schema: map[string]*schema.Schema{
-    "host": &schema.Schema{
-        Type:        schema.TypeString,
-        Required:    true,
-        DefaultFunc: schema.EnvDefaultFunc("HOMEAUTO_HOST", nil),
+return &schema.Provider{
+    Schema: map[string]*schema.Schema{
+        "host": &schema.Schema{
+            Type:        schema.TypeString,
+            Required:    true,
+            DefaultFunc: schema.EnvDefaultFunc("HOMEAUTO_HOST", nil),
+            Description: "There URL of the server: eg. `http://127.0.0.1:8123`",
+        },
+        "bearer_token": &schema.Schema{
+            Type:        schema.TypeString,
+            Required:    true,
+            Sensitive:   true,
+            DefaultFunc: schema.EnvDefaultFunc("HOMEAUTO_BEARER_TOKEN", nil),
+            Description: "There bearer Token of the server",
+        },
     },
-    "bearer_token": &schema.Schema{
-        Type:        schema.TypeString,
-        Required:    true,
-        Sensitive:   true,
-        DefaultFunc: schema.EnvDefaultFunc("HOMEAUTO_BEARER_TOKEN", nil),
+    ResourcesMap: map[string]*schema.Resource{
+        "homeauto_light": resourceLight(),
     },
-},
-ResourcesMap: map[string]*schema.Resource{
-    "homeauto_light": resourceLight(),
-},
-ConfigureContextFunc: providerConfigure,
+    ConfigureContextFunc: providerConfigure,
+}
 ```
 
 - schemas are how we layout the  data between go and terraform:
