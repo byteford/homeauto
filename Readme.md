@@ -36,20 +36,20 @@ anywhere you see `NAME` change to a username (no spaces)
         - We get errors about use not doing anything with the `bearer_token` variable but it works other than that
 - Go in to main.tf and set with provider up
 
-    ```HCL
-    terraform {
-        required_providers {
-            homeauto = {
-                version = "0.0.1"
-                source  = "github.com/NAME/homeauto"
-            }
+```HCL
+terraform {
+    required_providers {
+        homeauto = {
+            version = "0.0.1"
+            source  = "github.com/NAME/homeauto"
         }
     }
-    provider "homeauto" {
-        host         = "http://127.0.0.1:8123"
-        bearer_token = var.bearer_token
-    }  
-    ```
+}
+provider "homeauto" {
+    host         = "http://127.0.0.1:8123"
+    bearer_token = var.bearer_token
+}  
+```
 
 - In `variables.tf` paste
 
