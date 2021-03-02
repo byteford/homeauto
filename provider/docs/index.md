@@ -32,5 +32,5 @@ provider "homeauto" {
 
 ### Required
 
-- **bearer_token** (String, Sensitive)
-- **host** (String)
+- **bearer_token** (String, Sensitive) There bearer Token of the server
+- **host** (String) There URL of the server: eg. `http://127.0.0.1:8123`
