@@ -8,7 +8,7 @@ anywhere you see `NAME` change to a username (no spaces)
 ## 1. Set up the home-assistant instance
 
 - Open Terminal
-- `docker-compose up`
+- `docker-compose up --detach` (--detach means we can still use the same terminal)
 - Go to `URL:8123`
 - Make account - not https so don't use an important password
 (location and name doesn't matter)
