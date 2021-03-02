@@ -60,7 +60,7 @@ variable bearer_token{
 ```
 
 - Now run `terraform init` and `terraform plan`
-  - If you want to clean up the formatting in any of the terraform files just run `terraform fmt`      
+  - If you want to clean up the formatting in any of the terraform files just run `terraform fmt`
   - This should have run though and not given any errors, Though it isn't doing anything at the moment
 
 ## 5. Setting up the provider
@@ -100,22 +100,14 @@ ConfigureContextFunc: providerConfigure,
 var diags diag.Diagnostics
 bearerToken := d.Get("bearer_token").(string)
 
-var host *string
+var host string
 hVal, ok := d.GetOk("host")
 if ok {
     tempHost := hVal.(string)
-    host = &tempHost
+    host = tempHost
 }
 
-c, err := NewClient(host, &bearerToken)
-if err != nil {
-    diags = append(diags, diag.Diagnostic{
-        Severity: diag.Error,
-        Summary:  "Unable to create homeauto client",
-        Detail:   fmt.Sprintf("%v", err),
-    })
-    return nil, diags
-}
+c := NewClient(host, bearerToken, &http.Client{})
 return c, diags
 
 ```
@@ -160,7 +152,7 @@ item := LightItem{
     EntityID: d.Get("entity_id").(string),
     State:    d.Get("state").(string),
 }
-o, err := c.StartLight(item)
+err := StartLight(item,*c)
 if err != nil {
     return diag.FromErr(err)
 }
@@ -182,7 +174,7 @@ c := m.(*Client)
 var diags diag.Diagnostics
 lightID := d.Id()
 
-light, err := c.GetLight(lightID)
+light, err := GetLight(lightID, *c)
 if err != nil {
     return diag.FromErr(err)
 }
@@ -192,6 +184,7 @@ if err := d.Set("state", light.State); err != nil {
 return diags
 
 ```
+
 - Have a look in to the `terraform.tfstate` that was made when we did the `terraform apply` in the last step, the `status = tanted` meaning terraform doesn't trust the state
 - Delete the `terraform.tfstate` and `terraform.tfstate.backup` files if they exsist
 - Run `sh build.sh NAME 0.0.1` and look at the `terraform.tfstate` file again, you will see the status value isnt there this time because the state can be tracked now
@@ -208,7 +201,7 @@ item := LightItem{
     State:    d.Get("state").(string),
 }
 
-_, err := c.StartLight(item)
+err := StartLight(item, *c)
 if err != nil {
     return diag.FromErr(err)
 }
@@ -228,7 +221,7 @@ c := m.(*Client)
 var diags diag.Diagnostics
 lightID := d.Id()
 
-err := c.DelLight(lightID)
+err := DeleteLight(lightID, *c)
 if err != nil {
     return diag.FromErr(err)
 }
@@ -248,12 +241,13 @@ return diags
 package homeauto
 
 import (
-"context"
+    "context"
 
-"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
-"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+"   github.com/hashicorp/terraform-plugin-sdk/v2/diag"
+"g  ithub.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
+// resourceLight contains the definition of the recourse that terraform creates
 func resourceLight() *schema.Resource {
     return &schema.Resource{
         CreateContext: resourceLightCreate,
@@ -262,9 +256,9 @@ func resourceLight() *schema.Resource {
         DeleteContext: resourceLightDelete,
         Schema: map[string]*schema.Schema{
             "last_updated": &schema.Schema{
-                Type:     schema.TypeString,
-                Optional: true,
-                Computed: true,
+               Type:     schema.TypeString,
+               Optional: true,
+               Computed: true,
             },
             "entity_id": &schema.Schema{
                 Type:     schema.TypeString,
@@ -323,7 +317,10 @@ func resourceLight() *schema.Resource {
         },
     }
 }
+
+//resourceLightCreate is run when terraform apply creates a new resource
 func resourceLightCreate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+
     c := m.(*Client)
     item := LightItem{
         EntityID: d.Get("entity_id").(string),
@@ -345,20 +342,21 @@ func resourceLightCreate(ctx context.Context, d *schema.ResourceData, m interfac
     if d.Get("xy_color.#").(int) != 0 {
         item.Attr.XyColor = []float64{d.Get("xy_color.0").(float64), d.Get("xy_color.1").(float64)}
     }
-    o, err := c.StartLight(item)
+    err := StartLight(item, *c)
     if err != nil {
         return diag.FromErr(err)
     }
-    d.SetId(o.EntityID)
-    return resourceLightRead(ctx, d, m)
-
+    d.SetId(item.EntityID)
+return resourceLightRead(ctx, d, m)
 }
+
+//resourceLightRead is used to get the state of a light from the API
 func resourceLightRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
     c := m.(*Client)
     var diags diag.Diagnostics
     lightID := d.Id()
 
-    light, err := c.GetLight(lightID)
+    light, err := GetLight(lightID, *c)
     if err != nil {
         return diag.FromErr(err)
     }
@@ -376,6 +374,8 @@ func resourceLightRead(ctx context.Context, d *schema.ResourceData, m interface{
     }
     return diags
 }
+
+//resourceLightUpdate is called when a light already exists but the state needs to change
 func resourceLightUpdate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
     c := m.(*Client)
     item := LightItem{
@@ -398,24 +398,27 @@ func resourceLightUpdate(ctx context.Context, d *schema.ResourceData, m interfac
     if d.Get("xy_color.#").(int) != 0 {
         item.Attr.XyColor = []float64{d.Get("xy_color.0").(float64), d.Get("xy_color.1").(float64)}
     }
-    _, err := c.StartLight(item)
+    err := StartLight(item, *c)
     if err != nil {
         return diag.FromErr(err)
     }
     return resourceLightRead(ctx, d, m)
 }
+
+//resourceLightDelete is called when you run terraform delete or remove a resource from the state
 func resourceLightDelete(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
     c := m.(*Client)
     var diags diag.Diagnostics
     lightID := d.Id()
 
-    err := c.DelLight(lightID)
+    err := DeleteLight(lightID, *c)
     if err != nil {
         return diag.FromErr(err)
     }
     d.SetId("")
     return diags
 }
+
 ```
 
 -A light that makes use of the new code
