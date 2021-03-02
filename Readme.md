@@ -65,7 +65,7 @@ variable bearer_token{
 ## 5. Setting up the provider
 
 - Open up `./provider/homeauto/provider.go`
-- We have a skeliten of the Code to save time
+- We have a skeleton of the Code to save time
 - paste the following code in to the `return &schema.Provider block`
 
 ```go
