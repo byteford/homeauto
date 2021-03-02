@@ -30,28 +30,29 @@ func NewClient(host, token string, client *http.Client) *Client {
 //GetLight is used to get the currest state of a light
 //lightID = the ID of a light (eg. light.virtual_light_10 )
 func GetLight(lightID string, client Client) (LightItem, error) {
+	var light LightItem
 	url := fmt.Sprintf("%s/api/states/%s", client.HostURL, lightID)
 	req, err := http.NewRequest(http.MethodGet, url, nil)
 	if err != nil {
-		return LightItem{}, err
+		return light, err
 	}
 	req.Header.Set("Authorization", client.Token)
 	res, err := client.HTTPClient.Do(req)
 	if err != nil {
-		return LightItem{}, err
+		return light, err
 	}
 	defer res.Body.Close()
 	body, err := ioutil.ReadAll(res.Body)
 	if err != nil {
-		return LightItem{}, err
+		return light, err
 	}
 	if res.StatusCode != http.StatusOK && res.StatusCode != http.StatusCreated {
-		return LightItem{}, fmt.Errorf("status: %d, body: %s", res.StatusCode, body)
+		return light, fmt.Errorf("status: %d, body: %s", res.StatusCode, body)
 	}
-	var light LightItem
+
 	err = json.Unmarshal(body, &light)
 	if err != nil {
-		return LightItem{}, err
+		return light, err
 	}
 
 	return light, nil
