@@ -12,7 +12,7 @@ provider "homeauto" {
 }  
 resource "homeauto_light" "main" {
     entity_id = "light.virtual_light_10"
-    state     = "off"
+    state     = "on"
     }
     resource "homeauto_light" "colour" {
   entity_id     = "light.virtual_light_12"

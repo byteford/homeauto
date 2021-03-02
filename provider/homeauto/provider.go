@@ -10,23 +10,25 @@ import (
 
 // Provider -
 func Provider() *schema.Provider {
-	return &schema.Provider{Schema: map[string]*schema.Schema{
-		"host": &schema.Schema{
-			Type:        schema.TypeString,
-			Required:    true,
-			DefaultFunc: schema.EnvDefaultFunc("HOMEAUTO_HOST", nil),
+	return &schema.Provider{
+		Schema: map[string]*schema.Schema{
+			"host": &schema.Schema{
+				Type:        schema.TypeString,
+				Required:    true,
+				DefaultFunc: schema.EnvDefaultFunc("HOMEAUTO_HOST", nil),
+			},
+			"bearer_token": &schema.Schema{
+				Type:        schema.TypeString,
+				Required:    true,
+				Sensitive:   true,
+				DefaultFunc: schema.EnvDefaultFunc("HOMEAUTO_BEARER_TOKEN", nil),
+			},
 		},
-		"bearer_token": &schema.Schema{
-			Type:        schema.TypeString,
-			Required:    true,
-			Sensitive:   true,
-			DefaultFunc: schema.EnvDefaultFunc("HOMEAUTO_BEARER_TOKEN", nil),
-		},
-	},
 		ResourcesMap: map[string]*schema.Resource{
 			"homeauto_light": resourceLight(),
 		},
-		ConfigureContextFunc: providerConfigure}
+		ConfigureContextFunc: providerConfigure,
+	}
 }
 
 func providerConfigure(ctx context.Context, d *schema.ResourceData) (interface{}, diag.Diagnostics) {
@@ -51,5 +53,4 @@ func providerConfigure(ctx context.Context, d *schema.ResourceData) (interface{}
 		return nil, diags
 	}
 	return c, diags
-
 }
