@@ -11,7 +11,7 @@ anywhere you see `NAME` change to a username (no spaces)
 - `docker-compose up --detach` (--detach means we can still use the same terminal)
 - Go to `URL:8123`
 - Make account - not https so don't use an important password
-(location and name doesn't matter)
+  (location and name doesn't matter)
 - Click finish
 
 ## 2. get an api key
@@ -30,10 +30,12 @@ anywhere you see `NAME` change to a username (no spaces)
 
 ## 4. Connect terraform to the provider
 
+`If not running on linux inside the build.sh linux_amd64 need to change to your system `
+
 - run `sh build.sh NAME 0.0.1`
-        - This with compile the provider and save it to go build -o ~/.terraform.d/plugins/github.com/NAME/homeauto/0.0.1/darwin_amd64/
-        - The script will then run terraform plan and terraform apply
-        - We get errors about use not doing anything with the `bearer_token` variable but it works other than that
+  - This with compile the provider and save it to go build -o ~/.terraform.d/plugins/github.com/NAME/homeauto/0.0.1/darwin_amd64/
+  - The script will then run terraform plan and terraform apply
+  - We get errors about use not doing anything with the `bearer_token` variable but it works other than that
 - Go in to `main.tf` and set with provider up remeber to change `NAME`
 
 ```HCL
@@ -94,10 +96,10 @@ return &schema.Provider{
 ```
 
 - schemas are how we layout the  data between go and terraform:
+
   - `Schema: map[string]*schema.Schema{` Is used to set the providers inputs
   - `ResourcesMap: map[string]*schema.Resource{` Is used to define what resources can be called
   - `ConfigureContextFunc: providerConfigure` says what function should be used to configure the provider
-
 - In the `providerConfigure` replace its content with
 
 ```go
@@ -147,7 +149,6 @@ resource "homeauto_light" "main" {
 ```
 
 - This sets the methods to be run by terraform on different steps
-
 - Replace the content of `resourceLightCreate` with:
 
 ```go
