@@ -5,14 +5,31 @@ anywhere you see `NAME` change to a username (no spaces)
 
 ## 0. Pull down the `start` branch which has the boiler plate code in it
 
+open
+
+```
+- Terminal
+```
+
+`<url>/wetty` 
+ run `cd ~/workdir/homeauto`
+
+```
+- IDE if dont want to use vim to edit files
+```
+
+`<url>:8000`
+
 ## 1. Set up the home-assistant instance
 
-- Open Terminal
-- `docker-compose up --detach` (--detach means we can still use the same terminal)
-- Go to `URL:8123`
-- Make account - not https so don't use an important password
-  (location and name doesn't matter)
-- Click finish
+If using the Playgrounds infrastruture skip to step 3.
+
+1. Open Terminal
+2. `docker-compose up --detach` (--detach means we can still use the same terminal)
+3. Go to `URL:8123`
+4. Make account - not https so don't use an important password
+   (location and name doesn't matter)
+5. Click finish
 
 ## 2. get an api key
 
@@ -32,11 +49,11 @@ anywhere you see `NAME` change to a username (no spaces)
 
 `If not running on linux inside the build.sh linux_amd64 need to change to your system `
 
-- run `sh build.sh NAME 0.0.1`
-  - This with compile the provider and save it to go build -o ~/.terraform.d/plugins/github.com/NAME/homeauto/0.0.1/darwin_amd64/
+- run `sh build.sh NAME 0.0.1` remember to change `NAME` to your panda name
+  - This with compile the provider and save it to go build -o ~/.terraform.d/plugins/github.com/NAME/homeauto/0.0.1/linux_amd64/terraform-provider-homeauto_v0.0.1
   - The script will then run terraform plan and terraform apply
   - We get errors about use not doing anything with the `bearer_token` variable but it works other than that
-- Go in to `main.tf` and set with provider up remeber to change `NAME`
+- Go in to `main.tf` and set with provider up remember to change `NAME`
 
 ```HCL
 terraform {
@@ -61,7 +78,7 @@ variable bearer_token{
 }
 ```
 
-- Now run `terraform init` and `terraform plan`
+- run `sh build.sh NAME 0.0.1` remember to change `NAME` to your panda name
   - If you want to clean up the formatting in any of the terraform files just run `terraform fmt`
   - This should have run though and not given any errors, Though it isn't doing anything at the moment
 
@@ -69,29 +86,32 @@ variable bearer_token{
 
 - Open up `./provider/homeauto/provider.go`
 - We have a skeleton of the Code to save time
-- paste the following code in to the `return &schema.Provider block`
+- At the top of the file add `"net/http"` under `"context"`
+- Replace the code for the `Provider()` function with the following
 
 ```go
-return &schema.Provider{
-    Schema: map[string]*schema.Schema{
-        "host": &schema.Schema{
-            Type:        schema.TypeString,
-            Required:    true,
-            DefaultFunc: schema.EnvDefaultFunc("HOMEAUTO_HOST", nil),
-            Description: "There URL of the server: eg. `http://127.0.0.1:8123`",
-        },
-        "bearer_token": &schema.Schema{
-            Type:        schema.TypeString,
-            Required:    true,
-            Sensitive:   true,
-            DefaultFunc: schema.EnvDefaultFunc("HOMEAUTO_BEARER_TOKEN", nil),
-            Description: "There bearer Token of the server",
-        },
-    },
-    ResourcesMap: map[string]*schema.Resource{
-        "homeauto_light": resourceLight(),
-    },
-    ConfigureContextFunc: providerConfigure,
+func Provider() *schema.Provider {
+	return &schema.Provider{
+		Schema: map[string]*schema.Schema{
+			"host": &schema.Schema{
+				Type:        schema.TypeString,
+				Required:    true,
+				DefaultFunc: schema.EnvDefaultFunc("HOMEAUTO_HOST", nil),
+				Description: "There URL of the server: eg. `http://127.0.0.1:8123`",
+			},
+			"bearer_token": &schema.Schema{
+				Type:        schema.TypeString,
+				Required:    true,
+				Sensitive:   true,
+				DefaultFunc: schema.EnvDefaultFunc("HOMEAUTO_BEARER_TOKEN", nil),
+				Description: "There bearer Token of the server",
+			},
+		},
+		ResourcesMap: map[string]*schema.Resource{
+			"homeauto_light": resourceLight(),
+		},
+		ConfigureContextFunc: providerConfigure,
+	}
 }
 ```
 
@@ -100,21 +120,24 @@ return &schema.Provider{
   - `Schema: map[string]*schema.Schema{` Is used to set the providers inputs
   - `ResourcesMap: map[string]*schema.Resource{` Is used to define what resources can be called
   - `ConfigureContextFunc: providerConfigure` says what function should be used to configure the provider
-- In the `providerConfigure` replace its content with
+- Replace the `providerConfigure()` function with
 
 ```go
-var diags diag.Diagnostics
-bearerToken := d.Get("bearer_token").(string)
+func providerConfigure(ctx context.Context, d *schema.ResourceData) (interface{}, diag.Diagnostics) {
 
-var host string
-hVal, ok := d.GetOk("host")
-if ok {
-    tempHost := hVal.(string)
-    host = tempHost
+	var diags diag.Diagnostics
+	bearerToken := d.Get("bearer_token").(string)
+
+	var host string
+	hVal, ok := d.GetOk("host")
+	if ok {
+		tempHost := hVal.(string)
+		host = tempHost
+	}
+
+	c := NewClient(host, bearerToken, &http.Client{})
+	return c, diags
 }
-
-c := NewClient(host, bearerToken, &http.Client{})
-return c, diags
 
 ```
 
@@ -123,7 +146,7 @@ return c, diags
 ## 6. The resource
 
 - Return to the `main.tf` file
-- Under the provider lets make a basic light. Paste the following
+- At the bottom of the file lets make a basic light. Paste the following
 
 ```HCL
 resource "homeauto_light" "main" {
@@ -132,7 +155,7 @@ resource "homeauto_light" "main" {
 }
 ```
 
-- Run `sh build.sh NAME 0.0.1` to build and run everything again
+- run `sh build.sh NAME 0.0.1` remember to change `NAME` to your panda name
   - You should get a lovely error message saying not set up, but if you scroll up you can see the plan trying to make the lights.
   - It knows what a light is as the schema is already made in `./provider/homeauto/resource_Light.go`
 
@@ -149,68 +172,76 @@ resource "homeauto_light" "main" {
 ```
 
 - This sets the methods to be run by terraform on different steps
-- Replace the content of `resourceLightCreate` with:
+- Replace the `resourceLightCreate()` function with:
 
 ```go
-c := m.(*Client)
-item := LightItem{
-    EntityID: d.Get("entity_id").(string),
-    State:    d.Get("state").(string),
+func resourceLightCreate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+    c := m.(*Client)
+    item := LightItem{
+        EntityID: d.Get("entity_id").(string),
+        State:    d.Get("state").(string),
+    }
+    err := StartLight(item,*c)
+    if err != nil {
+        return diag.FromErr(err)
+    }
+    d.SetId(item.EntityID)
+    return resourceLightRead(ctx, d, m)
 }
-err := StartLight(item,*c)
-if err != nil {
-    return diag.FromErr(err)
-}
-d.SetId(o.EntityID)
-return resourceLightRead(ctx, d, m)
 ```
 
-- run `sh build.sh NAME 0.0.1` - Will through an error, but the light will be created
+- run `sh build.sh NAME 0.0.1` remember to change `NAME` to your panda name 
+    - Will through an error, but the light will be created
 - If you now go back to `URL:8123`, you should see a light appear
 
 ## 8. Saving the state
 
 - Having a way of creating light but not saving anything about them isn't that useful
 - still in `./provider/homeauto/resource_Light.go` lets add to the `resourceLightRead` function that will let terraform ask the api what states its in
-- replace the body of the `resourceLightRead` function with
+- replace the `resourceLightRead()` function with
 
 ```go
-c := m.(*Client)
-var diags diag.Diagnostics
-lightID := d.Id()
+func resourceLightRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+    c := m.(*Client)
+    var diags diag.Diagnostics
+    lightID := d.Id()
 
-light, err := GetLight(lightID, *c)
-if err != nil {
-    return diag.FromErr(err)
+    light, err := GetLight(lightID, *c)
+    if err != nil {
+        return diag.FromErr(err)
+    }
+    if err := d.Set("state", light.State); err != nil {
+        return diag.FromErr(err)
+    }
+    return diags
 }
-if err := d.Set("state", light.State); err != nil {
-    return diag.FromErr(err)
-}
-return diags
 
 ```
 
 - Have a look in to the `terraform.tfstate` that was made when we did the `terraform apply` in the last step, the `status = tanted` meaning terraform doesn't trust the state
 - Delete the `terraform.tfstate` and `terraform.tfstate.backup` files if they exsist
-- Run `sh build.sh NAME 0.0.1` and look at the `terraform.tfstate` file again, you will see the status value isnt there this time because the state can be tracked now
+- run `sh build.sh NAME 0.0.1` remember to change `NAME` to your panda name
+    -and look at the `terraform.tfstate` file again, you will see the status value isnt there this time because the state can be tracked now
 
 ## 9. Updating the light
 
 - One of the key features of terraform is being able to change the infrastructure by changing the .tf file. Lets implement that now.
-- Still in the `./provider/homeauto/resource_Light.go` file add the following code to the `resourceLightUpdate` function:
+- Still in the `./provider/homeauto/resource_Light.go` file replace the `resourceLightUpdate` function with:
 
 ```go
-c := m.(*Client)
-item := LightItem{
-    EntityID: d.Get("entity_id").(string),
-    State:    d.Get("state").(string),
-}
+func resourceLightUpdate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+    c := m.(*Client)
+    item := LightItem{
+        EntityID: d.Get("entity_id").(string),
+        State:    d.Get("state").(string),
+    }
 
-err := StartLight(item, *c)
-if err != nil {
-    return diag.FromErr(err)
+    err := StartLight(item, *c)
+    if err != nil {
+        return diag.FromErr(err)
+    }
+    return resourceLightRead(ctx, d, m)
 }
-return resourceLightRead(ctx, d, m)
 
 ```
 
@@ -222,18 +253,20 @@ return resourceLightRead(ctx, d, m)
 - To do this the following code should be put in to `resourceLightDelete`:
 
 ```go
-c := m.(*Client)
-var diags diag.Diagnostics
-lightID := d.Id()
+func resourceLightDelete(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+    c := m.(*Client)
+    var diags diag.Diagnostics
+    lightID := d.Id()
 
-err := DeleteLight(lightID, *c)
-if err != nil {
-    return diag.FromErr(err)
+    err := DeleteLight(lightID, *c)
+    if err != nil {
+        return diag.FromErr(err)
+    }
+    d.SetId("")
+    return diags
 }
-d.SetId("")
-return diags
 ```
-
+- You might have to delete `"fmt"` at the top of the file as we are no longer using the go model
 - If you now run `sh build.sh NAME 0.0.1` to build the latest code
 - Then run `terraform destroy` to destroy the light
 - Check `URL:8123` and you should see the light no longer there
