@@ -2,12 +2,12 @@ package homeauto
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
-// resourceLight contains the definition of the recourse that terraform creates
 func resourceLight() *schema.Resource {
 	return &schema.Resource{
 		CreateContext: resourceLightCreate,
@@ -77,104 +77,19 @@ func resourceLight() *schema.Resource {
 		},
 	}
 }
-
-//resourceLightCreate is run when terraform apply creates a new resource
 func resourceLightCreate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 
-	c := m.(*Client)
-	item := LightItem{
-		EntityID: d.Get("entity_id").(string),
-		State:    d.Get("state").(string),
-		Attr: Attributes{
-			Brightness:        d.Get("brightness").(int),
-			WhiteValue:        d.Get("white_value").(int),
-			Name:              d.Get("friendly_name").(string),
-			ColorMode:         d.Get("color_mode").(string),
-			SupportedFeatures: d.Get("supported_features").(int),
-		},
-	}
-	if d.Get("hs_color.#").(int) != 0 {
-		item.Attr.HsColor = []float64{d.Get("hs_color.0").(float64), d.Get("hs_color.1").(float64)}
-	}
-	if d.Get("rgb_color.#").(int) != 0 {
-		item.Attr.RgbColor = []int{d.Get("rgb_color.0").(int), d.Get("rgb_color.1").(int), d.Get("rgb_color.2").(int)}
-	}
-	if d.Get("xy_color.#").(int) != 0 {
-		item.Attr.XyColor = []float64{d.Get("xy_color.0").(float64), d.Get("xy_color.1").(float64)}
-	}
-	err := StartLight(item, *c)
-	if err != nil {
-		return diag.FromErr(err)
-	}
-	d.SetId(item.EntityID)
-	return resourceLightRead(ctx, d, m)
+	return diag.FromErr(fmt.Errorf("Not SetUP"))
 }
-
-//resourceLightRead is used to get the state of a light from the API
 func resourceLightRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	c := m.(*Client)
-	var diags diag.Diagnostics
-	lightID := d.Id()
 
-	light, err := GetLight(lightID, *c)
-	if err != nil {
-		return diag.FromErr(err)
-	}
-	if err := d.Set("state", light.State); err != nil {
-		return diag.FromErr(err)
-	}
-	if err := d.Set("hs_color", light.Attr.HsColor); err != nil {
-		return diag.FromErr(err)
-	}
-	if err := d.Set("rgb_color", light.Attr.RgbColor); err != nil {
-		return diag.FromErr(err)
-	}
-	if err := d.Set("xy_color", light.Attr.XyColor); err != nil {
-		return diag.FromErr(err)
-	}
-	return diags
+	return diag.FromErr(fmt.Errorf("Not SetUP"))
 }
-
-//resourceLightUpdate is called when a light already exists but the state needs to change
 func resourceLightUpdate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	c := m.(*Client)
-	item := LightItem{
-		EntityID: d.Get("entity_id").(string),
-		State:    d.Get("state").(string),
-		Attr: Attributes{
-			Brightness:        d.Get("brightness").(int),
-			WhiteValue:        d.Get("white_value").(int),
-			Name:              d.Get("friendly_name").(string),
-			ColorMode:         d.Get("color_mode").(string),
-			SupportedFeatures: d.Get("supported_features").(int),
-		},
-	}
-	if d.Get("hs_color.#").(int) != 0 {
-		item.Attr.HsColor = []float64{d.Get("hs_color.0").(float64), d.Get("hs_color.1").(float64)}
-	}
-	if d.Get("rgb_color.#").(int) != 0 {
-		item.Attr.RgbColor = []int{d.Get("rgb_color.0").(int), d.Get("rgb_color.1").(int), d.Get("rgb_color.2").(int)}
-	}
-	if d.Get("xy_color.#").(int) != 0 {
-		item.Attr.XyColor = []float64{d.Get("xy_color.0").(float64), d.Get("xy_color.1").(float64)}
-	}
-	err := StartLight(item, *c)
-	if err != nil {
-		return diag.FromErr(err)
-	}
-	return resourceLightRead(ctx, d, m)
+
+	return diag.FromErr(fmt.Errorf("Not SetUP"))
 }
-
-//resourceLightDelete is called when you run terraform delete or remove a resource from the state
 func resourceLightDelete(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	c := m.(*Client)
-	var diags diag.Diagnostics
-	lightID := d.Id()
 
-	err := DeleteLight(lightID, *c)
-	if err != nil {
-		return diag.FromErr(err)
-	}
-	d.SetId("")
-	return diags
+	return diag.FromErr(fmt.Errorf("Not SetUP"))
 }

@@ -3,7 +3,9 @@
 anywhere you see `URL` change to your instance url (or localhost if not remote)
 anywhere you see `NAME` change to a username (no spaces)
 
-## 0. Pull down the `start` branch which has the boiler plate code in it
+## 0. Setup Info
+
+On the playground day go to `https://lab.devopsplayground.org/`
 
 open
 
