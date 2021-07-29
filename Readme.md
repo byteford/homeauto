@@ -1,7 +1,8 @@
 # Steps
 
-anywhere you see `URL` change to your instance url (or localhost if not remote)
-anywhere you see `NAME` change to a username (no spaces)
+anywhere you see `<URL>` change to your instance url (or localhost if not remote)
+
+anywhere you see `<NAME>` change to a username (no spaces)
 
 ## 0. Setup Info
 
@@ -50,18 +51,18 @@ If using the Playgrounds infrastruture skip to step 3.
 
 `If not running on linux inside the build.sh linux_amd64 need to change to your system `
 
-- run `sh build.sh NAME 0.0.1` remember to change `NAME` to your panda name
-  - This with compile the provider and save it to go build -o ~/.terraform.d/plugins/github.com/NAME/homeauto/0.0.1/linux_amd64/terraform-provider-homeauto_v0.0.1
+- run `sh build.sh <NAME> 0.0.1` remember to change `<NAME>` to your panda name
+  - This with compile the provider and save it to go build -o ~/.terraform.d/plugins/github.com/<NAME>/homeauto/0.0.1/linux_amd64/terraform-provider-homeauto_v0.0.1
   - The script will then run terraform plan and terraform apply
   - We get errors about use not doing anything with the `bearer_token` variable but it works other than that
-- Go in to `main.tf` and set with provider up remember to change `NAME`
+- Go in to `main.tf` and set with provider up remember to change `<NAME>`
 
 ```HCL
 terraform {
     required_providers {
         homeauto = {
             version = "0.0.1"
-            source  = "github.com/NAME/homeauto"
+            source  = "github.com/<NAME>/homeauto"
         }
     }
 }
@@ -79,7 +80,7 @@ variable bearer_token{
 }
 ```
 
-- run `sh build.sh NAME 0.0.1` remember to change `NAME` to your panda name
+- run `sh build.sh <NAME> 0.0.1` remember to change `<NAME>` to your panda name
   - If you want to clean up the formatting in any of the terraform files just run `terraform fmt`
   - This should have run though and not given any errors, Though it isn't doing anything at the moment
 
@@ -156,7 +157,7 @@ resource "homeauto_light" "main" {
 }
 ```
 
-- run `sh build.sh NAME 0.0.1` remember to change `NAME` to your panda name
+- run `sh build.sh <NAME> 0.0.1` remember to change `<NAME>` to your panda name
   - You should get a lovely error message saying not set up, but if you scroll up you can see the plan trying to make the lights.
   - It knows what a light is as the schema is already made in `./provider/homeauto/resource_Light.go`
 
@@ -191,7 +192,7 @@ func resourceLightCreate(ctx context.Context, d *schema.ResourceData, m interfac
 }
 ```
 
-- run `sh build.sh NAME 0.0.1` remember to change `NAME` to your panda name 
+- run `sh build.sh <NAME> 0.0.1` remember to change `<NAME>` to your panda name 
     - Will through an error, but the light will be created
 - If you now go back to `URL:8123`, you should see a light appear
 
@@ -221,7 +222,7 @@ func resourceLightRead(ctx context.Context, d *schema.ResourceData, m interface{
 
 - Have a look in to the `terraform.tfstate` that was made when we did the `terraform apply` in the last step, the `status = tanted` meaning terraform doesn't trust the state
 - Delete the `terraform.tfstate` and `terraform.tfstate.backup` files if they exsist
-- run `sh build.sh NAME 0.0.1` remember to change `NAME` to your panda name
+- run `sh build.sh <NAME> 0.0.1` remember to change `<NAME>` to your panda name
     -and look at the `terraform.tfstate` file again, you will see the status value isnt there this time because the state can be tracked now
 
 ## 9. Updating the light
@@ -268,7 +269,7 @@ func resourceLightDelete(ctx context.Context, d *schema.ResourceData, m interfac
 }
 ```
 - You might have to delete `"fmt"` at the top of the file as we are no longer using the go model
-- If you now run `sh build.sh NAME 0.0.1` to build the latest code
+- If you now run `sh build.sh <NAME> 0.0.1` to build the latest code
 - Then run `terraform destroy` to destroy the light
 - Check `URL:8123` and you should see the light no longer there
 
