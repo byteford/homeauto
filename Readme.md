@@ -7,16 +7,15 @@ anywhere you see `NAME` change to a username (no spaces)
 
 open
 
-```
+
 - Terminal
-```
 
 `<url>/wetty` 
  run `cd ~/workdir/homeauto`
 
-```
+
 - IDE if dont want to use vim to edit files
-```
+
 
 `<url>:8000`
 
