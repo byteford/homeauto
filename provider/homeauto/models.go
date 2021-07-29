@@ -3,7 +3,7 @@ package homeauto
 // LightItem is used to hold the data from terraform in a way go can use
 // defines the json name for the api for easy conversion
 type LightItem struct {
-	EntityID string     `json:"entity_id"`
+	EntityID string
 	State    string     `json:"state"`
 	Attr     Attributes `json:"attributes"`
 }
